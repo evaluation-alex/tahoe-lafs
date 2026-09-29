@@ -48,6 +48,7 @@ preserving your privacy and security.
    filesystem-notes
    key-value-store
    frontends/webapi
+   freshness-and-mcp
    write_coordination
    cautions
    backupdb

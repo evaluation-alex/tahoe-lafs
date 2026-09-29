@@ -46,6 +46,10 @@ from ..util.assertutil import (
     precondition,
 )
 
+from .freshness import (
+    create_freshness_resources,
+    REGISTRY_FILENAME,
+)
 from .logs import (
     create_log_resources,
 )
@@ -121,9 +125,21 @@ class PrivateRealm:
         )
 
 
-def _create_vulnerable_tree():
+def _create_vulnerable_tree(client):
     private = Resource()
     private.putChild(b"logs", create_log_resources())
+    if client is not None:
+        # The freshness endpoint has to turn capabilities into nodes, so
+        # it is only meaningful when there is a client to do it with.
+        config = getattr(client, "config", None)
+        registry_path = None
+        if config is not None:
+            registry_path = config.get_private_path(
+                REGISTRY_FILENAME,
+            )
+        private.putChild(
+            b"freshness", create_freshness_resources(client, registry_path),
+        )
     return private
 
 
@@ -133,13 +149,21 @@ def _create_private_tree(get_auth_token, vulnerable):
     return HTTPAuthSessionWrapper(portal, [TokenCredentialFactory()])
 
 
-def create_private_tree(get_auth_token):
+def create_private_tree(get_auth_token, client=None):
     """
     Create a new resource tree that only allows requests if they include a
     correct `Authorization: tahoe-lafs <api_auth_token>` header (where
     `api_auth_token` matches the private configuration value).
+
+    :param get_auth_token: a callable returning the expected token as
+        ``bytes``.
+
+    :param client: the ``_Client`` to build node-specific endpoints from.
+        When this is ``None`` those endpoints are omitted, which is what
+        callers that only want the token-protected logging endpoints
+        should pass.
     """
     return _create_private_tree(
         get_auth_token,
-        _create_vulnerable_tree(),
+        _create_vulnerable_tree(client),
     )

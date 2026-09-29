@@ -178,6 +178,7 @@ dependencies = [
 [project.scripts]
 tahoe = "allmydata.scripts.runner:run"
 grid-manager = "allmydata.cli.grid_manager:grid_manager"
+tahoe-mcp = "allmydata.mcp.server:main"
 
 
 [project.urls]

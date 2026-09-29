@@ -234,7 +234,7 @@ class Root(MultiFormatResource):
         # Handler for everything beneath "/private", an area of the resource
         # hierarchy which is only accessible with the private per-node API
         # auth token.
-        self.putChild(b"private", create_private_tree(client.get_auth_token))
+        self.putChild(b"private", create_private_tree(client.get_auth_token, client))
 
         self.putChild(b"file", FileHandler(client))
         self.putChild(b"named", FileHandler(client))
